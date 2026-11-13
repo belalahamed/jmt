@@ -9,8 +9,7 @@ import {
   View,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { File, Paths } from "expo-file-system";
-import * as Sharing from "expo-sharing";
+import { Directory } from "expo-file-system";
 import BirthDownloadForm from "../components/BirthDownloadForm.js";
 import { birthDownloadSchema } from "../schemas/birthDownload.schema.js";
 import BirthDownloadService from "../services/birthDownloadService.js";
@@ -85,33 +84,28 @@ export default function BirthCertificateDownloadScreen() {
         );
       }
 
-      savedFile = new File(
-        Paths.document,
-        `birth-certificate-${Date.now()}.pdf`,
-      );
-      savedFile.create();
+      const saveDirectory = await Directory.pickDirectoryAsync();
+      const fileName = `birth-certificate-${Date.now()}.pdf`;
+      savedFile = saveDirectory.createFile(fileName, "application/pdf");
       await savedFile.write(bytes);
 
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(savedFile.uri, {
-          dialogTitle: "Save birth certificate",
-          mimeType: "application/pdf",
-        });
-      } else {
-        Alert.alert(
-          "PDF saved",
-          "The certificate was saved in the app's documents folder.",
-        );
-      }
+      Alert.alert("PDF saved", `Saved as ${fileName}.`);
     } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes("cancelled by the user")
+      ) {
+        return;
+      }
+
       const message =
         error instanceof Error
           ? error.message
           : "Please check the details and try again.";
       Alert.alert(
-        savedFile?.exists ? "PDF saved" : "Download failed",
+        savedFile?.exists ? "Save failed" : "Download failed",
         savedFile?.exists
-          ? `The PDF is saved, but it could not be opened for sharing. ${message}`
+          ? `The PDF could not be saved to the selected folder. ${message}`
           : message,
       );
     } finally {
