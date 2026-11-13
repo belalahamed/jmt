@@ -89,6 +89,9 @@ export default function BirthCertificateDownloadScreen() {
       savedFile = saveDirectory.createFile(fileName, "application/pdf");
       await savedFile.write(bytes);
 
+      setDateOfBirth("");
+      setMotherFirstName("");
+      setBirthCertificateNo("");
       Alert.alert("PDF saved", `Saved as ${fileName}.`);
     } catch (error) {
       if (
