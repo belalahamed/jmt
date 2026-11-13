@@ -6,52 +6,126 @@ import {
   Image,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   useWindowDimensions,
   View,
 } from "react-native";
+import Constants from "expo-constants";
+import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../theme/colors.js";
 
+const appVersion = Constants.expoConfig?.version ?? "1.0.0";
+
 const menuSections = [
   {
-    title: "NAVIGATION",
+    title: "MENU",
     items: [
       {
         href: "/",
         label: "Home",
         icon: "home",
-        category: "birth",
+        category: "general",
         available: true,
       },
     ],
   },
   {
-    title: "SERVICES",
+    title: "CERTIFICATE SERVICES",
     items: [
       {
         href: "/birth-download",
-        label: "Birth certificate",
+        label: "Download Birth Certificate",
         icon: "document",
         category: "birth",
         available: true,
       },
       {
         href: null,
-        label: "Death certificate",
+        label: "Download Death Certificate",
         icon: "document",
         category: "death",
         available: false,
       },
     ],
   },
+  {
+    title: "INFORMATION",
+    items: [
+      {
+        href: null,
+        label: "About Application",
+        icon: "info",
+        category: "general",
+        available: false,
+      },
+      {
+        href: null,
+        label: "Help & Support",
+        icon: "help",
+        category: "general",
+        available: false,
+      },
+    ],
+  },
+  {
+    title: "LEGAL",
+    items: [
+      {
+        href: null,
+        label: "Privacy Policy",
+        icon: "privacy",
+        category: "general",
+        available: false,
+      },
+      {
+        href: null,
+        label: "Terms & Conditions",
+        icon: "terms",
+        category: "general",
+        available: false,
+      },
+    ],
+  },
 ];
+
+function MenuIcon({ name, color }) {
+  if (name === "home") {
+    return <Text style={[styles.homeIcon, { color }]}>{"\u2302"}</Text>;
+  }
+
+  if (name === "info" || name === "help") {
+    return (
+      <View style={[styles.roundIcon, { borderColor: color }]}>
+        <Text style={[styles.roundIconText, { color }]}>
+          {name === "info" ? "i" : "?"}
+        </Text>
+      </View>
+    );
+  }
+
+  if (name === "privacy") {
+    return (
+      <View style={[styles.shieldIcon, { borderColor: color }]}>
+        <Text style={[styles.shieldIconText, { color }]}>{"\u2713"}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.documentIcon, { borderColor: color }]}>
+      <View style={[styles.documentLine, { backgroundColor: color }]} />
+      <View style={[styles.documentLineShort, { backgroundColor: color }]} />
+    </View>
+  );
+}
 
 export default function NavigationMenu() {
   const pathname = usePathname();
   const { width } = useWindowDimensions();
-  const drawerWidth = Math.min(width * 0.78, 320);
+  const drawerWidth = Math.min(width * 0.84, 420);
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const translateX = useRef(new Animated.Value(drawerWidth)).current;
@@ -145,119 +219,137 @@ export default function NavigationMenu() {
             ]}
           >
             <SafeAreaView edges={["top", "bottom"]} style={styles.drawerContent}>
-              <View style={styles.drawerHeader}>
-                <Image
-                  accessibilityLabel="JMT birth and death certificate logo"
-                  source={require("../../assets/icon.png")}
-                  style={styles.appLogo}
-                />
-                <View style={styles.appDetails}>
-                  <Text style={styles.appName}>JMT</Text>
-                  <Text style={styles.appCaption}>JANMA MRITYU TATHYA</Text>
+              <LinearGradient
+                colors={[colors.cyan, colors.primary, colors.darkBlue]}
+                end={{ x: 1, y: 1 }}
+                start={{ x: 0, y: 0 }}
+                style={styles.drawerHeader}
+              >
+                <View style={styles.headerTopRow}>
+                  <Image
+                    accessibilityLabel="JMT birth and death certificate logo"
+                    source={require("../../assets/icon.png")}
+                    style={styles.appLogo}
+                  />
+                  <View style={styles.appDetails}>
+                    <Text style={styles.appName}>JMT</Text>
+                    <Text style={styles.appCaption}>
+                      Birth &amp; Death Certificate Services
+                    </Text>
+                  </View>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Close navigation menu"
+                    hitSlop={8}
+                    onPress={closeMenu}
+                    style={({ pressed }) => [
+                      styles.closeButton,
+                      pressed && styles.closeButtonPressed,
+                    ]}
+                  >
+                    <Text style={styles.closeButtonText}>{"\u00d7"}</Text>
+                  </Pressable>
                 </View>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Close menu"
-                  hitSlop={8}
-                  onPress={closeMenu}
-                  style={styles.closeButton}
-                >
-                  <Text style={styles.closeButtonText}>X</Text>
-                </Pressable>
-              </View>
+              </LinearGradient>
 
-              {menuSections.map((section, index) => (
-                <View
-                  key={section.title}
-                  style={[
-                    styles.navigationSection,
-                    index > 0 && styles.navigationSectionSeparated,
-                  ]}
+              <View style={styles.drawerBody}>
+                <ScrollView
+                  contentContainerStyle={styles.menuList}
+                  showsVerticalScrollIndicator={false}
                 >
-                  <Text style={styles.sectionTitle}>{section.title}</Text>
-                  {section.items.map((item) => {
-                    const isSelected = item.available && pathname === item.href;
-                    const palette =
-                      item.category === "death" ? colors.death : colors.birth;
-                    const menuItem = (
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={
-                          item.available ? item.label : `${item.label}, coming soon`
-                        }
-                        accessibilityState={{
-                          disabled: !item.available,
-                          selected: isSelected,
-                        }}
-                        disabled={!item.available}
-                        onPress={item.available ? closeMenu : undefined}
-                        style={({ pressed }) => [
-                          styles.menuItem,
-                          isSelected && styles.menuItemSelected,
-                          !item.available && styles.menuItemUnavailable,
-                          pressed && styles.menuItemPressed,
-                        ]}
-                      >
-                        <View
-                          style={[
-                            styles.menuItemIcon,
-                            { backgroundColor: palette.background },
-                          ]}
-                        >
-                          {item.icon === "home" ? (
-                            <Text
-                              style={[styles.homeIcon, { color: palette.primary }]}
-                            >
-                              {"\u2302"}
-                            </Text>
-                          ) : (
-                            <View
-                              style={[
-                                styles.documentIcon,
-                                { borderColor: palette.primary },
-                              ]}
-                            >
-                              <View
-                                style={[
-                                  styles.documentLine,
-                                  { backgroundColor: palette.primary },
-                                ]}
-                              />
-                              <View
-                                style={[
-                                  styles.documentLineShort,
-                                  { backgroundColor: palette.primary },
-                                ]}
-                              />
-                            </View>
-                          )}
-                        </View>
-                        <View style={styles.menuItemCopy}>
-                          <Text
-                            style={[
-                              styles.menuItemText,
-                              isSelected && { color: palette.primary },
+                  {menuSections.map((section) => (
+                    <View key={section.title} style={styles.navigationSection}>
+                      <Text style={styles.sectionTitle}>{section.title}</Text>
+                      {section.items.map((item) => {
+                        const isSelected =
+                          item.available && pathname === item.href;
+                        const palette =
+                          item.category === "death"
+                            ? colors.death
+                            : item.category === "birth"
+                              ? colors.birth
+                              : {
+                                  primary: colors.primary,
+                                  background: colors.lightCyan,
+                                };
+                        const menuItem = (
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={
+                              item.available
+                                ? item.label
+                                : `${item.label}, coming soon`
+                            }
+                            accessibilityState={{
+                              disabled: !item.available,
+                              selected: isSelected,
+                            }}
+                            disabled={!item.available}
+                            onPress={item.available ? closeMenu : undefined}
+                            style={({ pressed }) => [
+                              styles.menuItem,
+                              isSelected && {
+                                backgroundColor: palette.background,
+                              },
+                              !item.available && styles.menuItemUnavailable,
+                              pressed && styles.menuItemPressed,
                             ]}
                           >
-                            {item.label}
-                          </Text>
-                          {!item.available ? (
-                            <Text style={styles.menuItemHint}>Coming soon</Text>
-                          ) : null}
-                        </View>
-                      </Pressable>
-                    );
+                            <View
+                              style={[
+                                styles.menuItemIcon,
+                                { backgroundColor: palette.background },
+                              ]}
+                            >
+                              <MenuIcon name={item.icon} color={palette.primary} />
+                            </View>
+                            <View style={styles.menuItemCopy}>
+                              <Text
+                                style={[
+                                  styles.menuItemText,
+                                  isSelected && { color: palette.primary },
+                                ]}
+                              >
+                                {item.label}
+                              </Text>
+                              {!item.available ? (
+                                <Text style={styles.menuItemHint}>
+                                  Coming soon
+                                </Text>
+                              ) : null}
+                            </View>
+                          </Pressable>
+                        );
 
-                    return item.available ? (
-                      <Link key={item.label} href={item.href} asChild>
-                        {menuItem}
-                      </Link>
-                    ) : (
-                      <View key={item.label}>{menuItem}</View>
-                    );
-                  })}
+                        const menuEntry = item.available ? (
+                          <Link href={item.href} asChild>
+                            {menuItem}
+                          </Link>
+                        ) : (
+                          menuItem
+                        );
+
+                        return (
+                          <View
+                            key={item.label}
+                            style={styles.menuItemWrapper}
+                          >
+                            {menuEntry}
+                          </View>
+                        );
+                      })}
+                    </View>
+                  ))}
+                </ScrollView>
+
+                <View style={styles.footer}>
+                  <Text style={styles.version}>Version {appVersion}</Text>
+                  <View style={styles.footerDivider} />
+                  <Text style={styles.footerMessage}>
+                    Made with care for citizens.
+                  </Text>
                 </View>
-              ))}
+              </View>
             </SafeAreaView>
           </Animated.View>
         </View>
@@ -296,106 +388,123 @@ const styles = StyleSheet.create({
   },
   drawer: {
     backgroundColor: colors.card,
-    borderBottomLeftRadius: 22,
-    borderTopLeftRadius: 22,
+    borderBottomLeftRadius: 24,
+    borderTopLeftRadius: 24,
     elevation: 12,
-    maxWidth: 320,
+    maxWidth: 420,
     shadowColor: colors.navy,
-    shadowOffset: { width: -5, height: 0 },
+    shadowOffset: { width: -6, height: 0 },
     shadowOpacity: 0.14,
     shadowRadius: 16,
   },
   drawerContent: {
     flex: 1,
-    paddingHorizontal: 20,
+    backgroundColor: colors.card,
+    borderBottomLeftRadius: 24,
+    borderTopLeftRadius: 24,
+    overflow: "hidden",
   },
   drawerHeader: {
+    paddingHorizontal: 18,
+    paddingBottom: 20,
+    paddingTop: 18,
+  },
+  headerTopRow: {
     alignItems: "center",
-    borderBottomColor: colors.border,
-    borderBottomWidth: 1,
     flexDirection: "row",
-    minHeight: 76,
-    paddingBottom: 14,
-    paddingTop: 14,
+    marginBottom: 12,
   },
   appLogo: {
     borderRadius: 12,
-    height: 44,
+    height: 46,
     marginRight: 11,
-    width: 44,
+    width: 46,
   },
   appDetails: {
     flex: 1,
+    paddingRight: 4,
   },
   appName: {
-    color: colors.text,
-    fontSize: 17,
+    color: colors.card,
+    fontSize: 18,
     fontWeight: "700",
   },
   appCaption: {
-    color: colors.secondaryText,
-    fontSize: 9,
-    letterSpacing: 0.6,
-    marginTop: 3,
+    color: "rgba(255, 255, 255, 0.88)",
+    fontSize: 12,
+    lineHeight: 17,
   },
   closeButton: {
     alignItems: "center",
-    backgroundColor: colors.lightCyan,
-    borderRadius: 12,
-    height: 44,
+    backgroundColor: "rgba(255, 255, 255, 0.16)",
+    borderColor: "rgba(255, 255, 255, 0.45)",
+    borderRadius: 13,
+    borderWidth: 1,
+    height: 42,
     justifyContent: "center",
-    marginLeft: 8,
-    width: 44,
+    marginLeft: 6,
+    width: 42,
   },
   closeButtonText: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: "700",
+    color: colors.card,
+    fontSize: 26,
+    fontWeight: "400",
+    lineHeight: 30,
+  },
+  closeButtonPressed: {
+    opacity: 0.7,
+  },
+  drawerBody: {
+    flex: 1,
+    paddingHorizontal: 18,
+  },
+  menuList: {
+    paddingBottom: 12,
+    paddingTop: 8,
+  },
+  menuItemWrapper: {
+    alignSelf: "stretch",
+    width: "100%",
   },
   navigationSection: {
-    paddingTop: 22,
-  },
-  navigationSectionSeparated: {
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
-    marginTop: 14,
-    paddingTop: 17,
+    paddingTop: 12,
   },
   sectionTitle: {
     color: colors.secondaryText,
     fontSize: 10,
     fontWeight: "700",
-    letterSpacing: 1,
-    marginBottom: 10,
-    marginLeft: 12,
+    letterSpacing: 0.9,
+    marginBottom: 7,
+    marginLeft: 10,
   },
   menuItem: {
+    alignSelf: "stretch",
     alignItems: "center",
     borderRadius: 14,
     flexDirection: "row",
-    marginBottom: 7,
-    minHeight: 58,
+    marginBottom: 4,
+    minHeight: 54,
     paddingHorizontal: 10,
-  },
-  menuItemSelected: {
-    backgroundColor: colors.background,
+    width: "100%",
   },
   menuItemUnavailable: {
-    opacity: 0.7,
+    opacity: 0.56,
   },
   menuItemPressed: {
     opacity: 0.72,
   },
   menuItemIcon: {
     alignItems: "center",
-    borderRadius: 11,
-    height: 38,
+    borderRadius: 10,
+    height: 36,
     justifyContent: "center",
-    marginRight: 12,
-    width: 38,
+    marginRight: 11,
+    width: 36,
   },
   menuItemCopy: {
     flex: 1,
+    justifyContent: "center",
+    minWidth: 0,
   },
   homeIcon: {
     fontSize: 24,
@@ -420,14 +529,66 @@ const styles = StyleSheet.create({
     marginTop: 3,
     width: 5,
   },
+  roundIcon: {
+    alignItems: "center",
+    borderRadius: 9,
+    borderWidth: 1.5,
+    height: 19,
+    justifyContent: "center",
+    width: 19,
+  },
+  roundIconText: {
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 16,
+  },
+  shieldIcon: {
+    alignItems: "center",
+    borderBottomLeftRadius: 9,
+    borderBottomRightRadius: 9,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
+    borderWidth: 1.5,
+    height: 20,
+    justifyContent: "center",
+    width: 17,
+  },
+  shieldIconText: {
+    fontSize: 11,
+    fontWeight: "700",
+    lineHeight: 14,
+  },
   menuItemText: {
     color: colors.text,
+    flexShrink: 1,
     fontSize: 15,
     fontWeight: "600",
+    includeFontPadding: false,
+    lineHeight: 20,
   },
   menuItemHint: {
     color: colors.secondaryText,
     fontSize: 11,
     marginTop: 3,
+  },
+  footer: {
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    paddingBottom: 12,
+    paddingTop: 12,
+  },
+  version: {
+    color: colors.secondaryText,
+    fontSize: 11,
+    marginBottom: 9,
+  },
+  footerDivider: {
+    backgroundColor: colors.border,
+    height: 1,
+    marginBottom: 9,
+  },
+  footerMessage: {
+    color: colors.secondaryText,
+    fontSize: 12,
   },
 });

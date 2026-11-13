@@ -32,9 +32,9 @@ export default function BirthDownloadForm({
         <View style={styles.categoryBadge}>
           <Text style={styles.categoryBadgeText}>BIRTH CERTIFICATE</Text>
         </View>
-        <Text style={styles.title}>Download a birth certificate</Text>
+        <Text style={styles.title}>Download Birth Certificate</Text>
         <Text style={styles.description}>
-          Enter the details below to find your certificate.
+          Enter the details below to download your birth certificate.
         </Text>
       </View>
 

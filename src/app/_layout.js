@@ -11,13 +11,18 @@ export default function RootLayout() {
         headerTintColor: colors.navy,
         headerTitleStyle: { color: colors.text, fontWeight: "700" },
         headerShadowVisible: false,
-        headerRight: () => <NavigationMenu />,
       }}
     >
-      <Stack.Screen name="index" options={{ title: "JMT" }} />
+      <Stack.Screen
+        name="index"
+        options={{
+          title: "JMT",
+          headerRight: () => <NavigationMenu />,
+        }}
+      />
       <Stack.Screen
         name="birth-download"
-        options={{ title: "Birth certificate" }}
+        options={{ title: "Birth Certificate" }}
       />
     </Stack>
   );
