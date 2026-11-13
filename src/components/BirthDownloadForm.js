@@ -16,6 +16,7 @@ export default function BirthDownloadForm({
   isDownloading,
   onBirthCertificateNumberChange,
   onDateOfBirthChange,
+  onInputFocus,
   onMotherFirstNameChange,
   onSubmit,
   birthCertificateNumberInputRef,
@@ -46,7 +47,10 @@ export default function BirthDownloadForm({
           accessibilityLabel="Date of Birth"
           autoCapitalize="none"
           onBlur={() => setFocusedField(null)}
-          onFocus={() => setFocusedField("dateOfBirth")}
+          onFocus={() => {
+            setFocusedField("dateOfBirth");
+            onInputFocus();
+          }}
           style={[
             styles.input,
             focusedField === "dateOfBirth" && styles.inputFocused,
@@ -70,7 +74,10 @@ export default function BirthDownloadForm({
           autoCapitalize="words"
           autoCorrect={false}
           onBlur={() => setFocusedField(null)}
-          onFocus={() => setFocusedField("motherFirstName")}
+          onFocus={() => {
+            setFocusedField("motherFirstName");
+            onInputFocus();
+          }}
           style={[
             styles.input,
             focusedField === "motherFirstName" && styles.inputFocused,
@@ -95,7 +102,10 @@ export default function BirthDownloadForm({
           autoCapitalize="characters"
           autoCorrect={false}
           onBlur={() => setFocusedField(null)}
-          onFocus={() => setFocusedField("birthCertificateNumber")}
+          onFocus={() => {
+            setFocusedField("birthCertificateNumber");
+            onInputFocus();
+          }}
           style={[
             styles.input,
             focusedField === "birthCertificateNumber" && styles.inputFocused,

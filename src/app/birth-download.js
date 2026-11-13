@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -25,6 +26,21 @@ export default function BirthCertificateDownloadScreen() {
   const [motherFirstName, setMotherFirstName] = useState("");
   const [birthCertificateNo, setBirthCertificateNo] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true),
+    );
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false),
+    );
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   async function handleDownload() {
     const validation = birthDownloadSchema.safeParse({
@@ -105,12 +121,16 @@ export default function BirthCertificateDownloadScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.screen}
     >
       <StatusBar style="dark" />
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          keyboardVisible && styles.scrollContentKeyboard,
+        ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -121,6 +141,7 @@ export default function BirthCertificateDownloadScreen() {
             isDownloading={isDownloading}
             onBirthCertificateNumberChange={setBirthCertificateNo}
             onDateOfBirthChange={setDateOfBirth}
+            onInputFocus={() => setKeyboardVisible(true)}
             onMotherFirstNameChange={setMotherFirstName}
             onSubmit={handleDownload}
             birthCertificateNumberInputRef={birthCertificateNoInput}
@@ -138,8 +159,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
-    flexGrow: 1,
+    flexGrow: 2,
+  },
+  scrollContentKeyboard: {
+    paddingBottom: 140,
   },
   content: {
     alignSelf: "center",
